@@ -1,0 +1,25 @@
+<!-- blog/templates/blog/post_list.html -->
+
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Blog Posts</h1>
+  <form method="get">
+   
+    <select name="category">
+      <option value="" {% if not category_id %}selected{% endif %}>All Categories</option>
+      {% for category in categories %}
+        <option value="{{ category.id }}" {% if category.id == category_id %}selected{% endif %}>{{ category.name }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit">Search</button>
+  </form>
+  {% for post in posts %}
+    <div class="post">
+      <h2><a href="{% url 'post_detail' post.pk %}">{{ post.title }}</a></h2>
+      <p>{{ post.content }}</p>
+      <p>Created at: {{ post.created_at }}</p>
+      <p>Created by: {{ post.author }}</p>
+    </div>
+  {% endfor %}
+{% endblock %}

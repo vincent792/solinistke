@@ -1,0 +1,13 @@
+<!-- blog/templates/blog/activate.html -->
+
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Account Activation</h1>
+  <form method="post">
+    {% csrf_token %}
+    <label for="activation_code">Activation Code:</label>
+    <input type="text" id="activation_code" name="activation_code" required><br>
+    <button type="submit">Submit</button>
+  </form>
+{% endblock %}
