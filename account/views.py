@@ -1,7 +1,8 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render,redirect,get_object_or_404
 from  django.contrib import messages,  auth
-from  account.models import Account
+from  account.models import Account,Activation,Mpesa
 from django.contrib.auth.models import User
+from django.urls import reverse
 # Create your views here.
 def register(request):
     if  request.method=='POST':
@@ -44,18 +45,56 @@ def logout(request):
 
 
 def activate(request):
-    if request.method == 'POST':
-        activation_code = request.POST.get('activation_code')
-        
-        # Assuming you have a custom user model with an 'activation_code' field
-        user = Account.objects.filter(activation_code=activation_code).first()
-
-        if user:
-            user.is_activated = True
-            user.save()
-            return redirect('post_detail')  # Redirect to the list of posts or any other page
-        else:
-            return redirect('post_list')
-
+   
     return render(request, 'account/activate.html')
+
+def activate1(request):
+    context={}
+    uname=request.user.account.username
+    phone=request.user.account.phone
+
+    if request.method == 'POST':
+        uname=uname
+        phone=phone
+        code=request.POST['code']
+
+        save_to_db=Activation(username=uname,phone=phone, transaction_code=code)
+        save_to_db.save()
+        # Use reverse() to build the URL with the required parameter
+        activate_account_url = reverse('activate_account', kwargs={'mpesa_code': code})
+        return redirect(activate_account_url)
+    context['uname']=uname
+    context['phone']=phone
+    return render(request, 'account/activate1.html',context)
+
+def activate_account(request, mpesa_code):
+    uname=request.user.username
+    # Find the corresponding Activation object
+    activations = Activation.objects.filter(username=uname,transaction_code=mpesa_code)
+    activation=activations.first()
+    print(activation)
+    
+    # Find the corresponding Mpesa object
+    mpesa = Mpesa.objects.filter(phone=activation.phone, code=activation.transaction_code).first()
+
+    if mpesa:
+        # Update the Account object's is_activated field to True
+        account = get_object_or_404(Account, username=activation.username)
+        account.is_activated = True
+        account.save()
+
+        # You can also delete the Activation and Mpesa objects if needed
+        activation.delete()
+        mpesa.delete()
+
+     
+
+        # Redirect or render a success page
+        return render(request, 'success.html', {'message': 'Account activated successfully'})
+
+    else:
+        # Handle the case when the codes do not match
+        return render(request, 'error.html', {'message': 'Invalid activation code'})
+    
+
 

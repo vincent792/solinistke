@@ -2,8 +2,9 @@
 from django.contrib import admin
 from django.urls import path
 from  main.views import(post_detail,post_list, category_detail,category_list,post_create,post_edit,post_delete,)
-from  account.views import(register,login,logout,activate)
-
+from  account.views import(register,login,logout,activate,activate1,activate_account)
+from django.conf import settings
+from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', post_list, name='post_list'),
@@ -14,8 +15,11 @@ urlpatterns = [
     path('post/edit/<int:pk>/', post_edit, name='post_edit'),  
     path('post/delete/<int:pk>/', post_delete, name='post_delete'),
     path('activate/', activate, name='activate'),
+    path('activate1/', activate1, name='activate1'),
+    path('activate/<str:mpesa_code>/', activate_account, name='activate_account'),
 
     path('register/', register, name='register'),
+    path('accounts/login/', login, name='login'),
     path('login/', login, name='login'),
     path('logout/', logout, name='logout'),
 
@@ -23,3 +27,4 @@ urlpatterns = [
 
 
 ]
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

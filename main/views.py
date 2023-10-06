@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404, render,redirect
-
+from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 # Create your views here.
 
@@ -7,10 +7,15 @@ from main.models import Post, Category
 from account.models import Account
 def post_list(request):
     print(request.user.username)
+    context={}
     
     category_id = request.GET.get('category')
 
-    posts = Post.objects.all()
+    posts = Post.objects.filter(deadline__gte=timezone.now())
+    vacancies=Post.objects.first().vacancy
+    vacancy_list = vacancies.split('\n')
+    attributes=Post.objects.first().attributes
+    attributes_list=attributes.split('\n')
 
     if category_id:
         category = Category.objects.get(pk=category_id)
@@ -18,12 +23,18 @@ def post_list(request):
 
     categories = Category.objects.all()
 
-    return render(request, 'main/post_list.html', {'posts': posts, 'categories': categories,  'category_id': category_id})
+    context['vacancy_list']=vacancy_list
+    context['attributes_list']=attributes_list
+    context['posts']=posts
+    context['categories']=categories
+    context['category_id']=category_id
+
+    return render(request, 'main/post_list.html', context)
 
 # def post_list(request):
 #     posts = Post.objects.all()
 #     return render(request, 'main/post_list.html', {'posts': posts})
-
+@login_required
 def post_detail(request, pk):
     uname=request.user.username
     user= Account.objects.get(username=uname)
@@ -87,7 +98,7 @@ def post_edit(request, pk):
                 return redirect('post_list')  # Redirect to the list of posts
     
     return render(request, 'staff/post_edit.html', {'post': post, 'categories': categories})
-
+@login_required
 def post_delete(request, pk):
     post = get_object_or_404(Post, pk=pk)
     if  request.user.username==post.author:    

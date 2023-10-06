@@ -9,6 +9,23 @@ class Account(models.Model):
     password=models.CharField(max_length=255, blank=True, null= True)
     is_activated=models.BooleanField(default=False)
     activation_code=models.CharField(max_length=100, blank=True, null=True)
+    phone=models.CharField(max_length=13, null=True, blank=True)
 
     def __str__(self) -> str:
         return self.username
+    
+
+class Activation(models.Model):
+    transaction_code=models.CharField(max_length=255)
+    phone=models.CharField(max_length=13)
+    username=models.CharField(max_length=255)
+
+    def __str__(self) -> str:
+        return self.username
+    
+class Mpesa(models.Model):
+    code=models.CharField(max_length=100)
+    phone=models.CharField(max_length=13)
+
+    def __str__(self) -> str:
+        return self.code
